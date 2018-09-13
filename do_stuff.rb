@@ -5,6 +5,7 @@ require 'mysql2'
 require 'fileutils'
 require 'json'
 require 'dotenv'
+require "open-uri"
 
 Dotenv.load
 
@@ -20,7 +21,7 @@ end
 
 def delete_directory(dir)
     if !Dir.exist?("/var/www/wordpress/#{dir}")
-        raise "Directory doesn't exist"
+        return
     end
 
     FileUtils.rm_rf("/var/www/wordpress/#{dir}")
@@ -99,6 +100,22 @@ def sync_db_export(db_name, replacement_domain)
     FileUtils.rm(url_cleaned_db_filename)
 end
 
+def write_wpconfig(db, pw)
+    uri = open("https://api.wordpress.org/secret-key/1.1/salt/")
+    keys = uri.read
+
+    File.open("./wp-config.php") do |source_file|
+        contents = source_file.read
+        contents.gsub!("replace_dbname", db)
+        contents.gsub!("replace_dbuser", db)
+        contents.gsub!("replace_dbpw", pw)
+        contents.gsub!("replace_keys", keys)
+        File.open("/var/www/wordpress/#{db}/wp-config.php", "w+") { |f| f.write(contents) }
+    end
+
+    FileUtils.cp("./htaccess", "/var/www/wordpress/#{db}/.htaccess")
+end
+
 get '/' do
     send_file File.join(settings.public_folder, 'index.html')
 end
@@ -141,6 +158,9 @@ get '/new_devenv' do
 
     client.query("USE deploy_config")
     client.query("INSERT INTO devenvs (subdomain, creator, more_text) VALUES ('#{db}', '#{who}', '')")
+
+    write_wpconfig(db, pw)
+
     return JSON.generate(
         client.query("SELECT * FROM devenvs WHERE subdomain='#{db}'", :as => :json).first
     )
