@@ -13,7 +13,12 @@ var app = new Vue({
                 last_updated: "2018-08-01 00:00:01",
                 more_text: "Continuously pulls from the master branch.",
             }
-        ]
+        ],
+        new_devenv: false,
+        rsync_code: "",
+        scp_code: "",
+        mysql_username: "",
+        mysql_password: ""
     },
     filters: {
         reldate: function(timestamp) {
@@ -39,9 +44,30 @@ var app = new Vue({
             this.new_devenv_subdomain = ""
             axios.get(this.ajax_prefix + 'new_devenv?subdomain=' + subdomain + '&creator=jlittle').then(function(res) {
                 app.devenvs.push(res.data)
+
+                app.scp_code = "scp -r deploy.bowdoinorient.co:/var/www/wordpress/" + res.data["subdomain"] + " {local location}"
+                app.rsync_code = "rsync -ar --delete-before {local location} james@159.89.231.230:/var/www/wordpress/" + res.data["subdomain"]
+                app.mysql_username = res.data["subdomain"]
+                app.mysql_password = res.data["sql_password"]
+                app.new_devenv = true
             }).catch(function(err) {
                 alert(err)
             })
+        },
+
+        info_env: function(sd) {
+            console.log(sd)
+            devenv = this.devenvs.filter(function(env) {
+                return env.subdomain == sd
+            })[0]
+
+            console.log(devenv)
+
+            app.scp_code = "scp -r james@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " {local location}"
+            app.rsync_code = "rsync -ar --delete-before {local location} james@deploy.bowdoinorient.co:/var/www/wordpress/" + sd
+            app.mysql_username = sd
+            app.mysql_password = devenv["sql_password"]
+            app.new_devenv = true
         },
 
         delete_env: function(sd) {

@@ -157,7 +157,7 @@ get '/new_devenv' do
     sync_db_export(db, db + ".test.bowdoinorient.co")
 
     client.query("USE deploy_config")
-    client.query("INSERT INTO devenvs (subdomain, creator, more_text) VALUES ('#{db}', '#{who}', '')")
+    client.query("INSERT INTO devenvs (subdomain, creator, more_text, sql_password) VALUES ('#{db}', '#{who}', '', '#{pw}')")
 
     write_wpconfig(db, pw)
 

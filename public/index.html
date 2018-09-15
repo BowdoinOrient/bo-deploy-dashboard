@@ -34,10 +34,21 @@
                        >{{env.subdomain}}</a>
                     — {{ env.more_text }}
                     Last updated {{env.last_updated | reldate}}.
-                    <a v-if="env.subdomain != 'master'"
-                        href="#" class="delete" @click="delete_env(env.subdomain)">delete</a>
+                    <span v-if="env.subdomain != 'master'">
+                        <a href="#" @click="info_env(env.subdomain)">info</a> |
+                        <a href="#" class="delete" @click="delete_env(env.subdomain)">delete</a>
+                    </span>
                     </li>
                 </ul>
+            </section>
+
+            <section v-if="new_devenv">
+                <p><strong>scp code:</strong></p>
+                <pre><code>$ {{ scp_code }}</code></pre>
+                <p><strong>rsync code:</strong></p>
+                <pre><code>$ {{ rsync_code }}</code></pre>
+                <p><strong>MySQL info:</strong></p>
+                <p>Username: <code>{{ mysql_username }}</code><br>Password: <code>{{ mysql_password }}</code></p>
             </section>
 		</main>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>

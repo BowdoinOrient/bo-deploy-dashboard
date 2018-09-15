@@ -102,3 +102,10 @@ h1, p {
 .warning-text {
     color: hsla(21, 81%, 38%, 1);
 }
+
+pre {
+    padding: 8px;
+    background: #444;
+    color: #EEE;
+    overflow-y: scroll;
+}
