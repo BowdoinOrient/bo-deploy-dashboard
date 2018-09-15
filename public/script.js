@@ -7,6 +7,7 @@ var app = new Vue({
         ajax_prefix: "http://deploy.bowdoinorient.co/",
         devenv_form_visible: false,
         new_devenv_subdomain: "",
+        loading: true,
         devenvs: [
             {
                 subdomain: 'master',
@@ -28,17 +29,26 @@ var app = new Vue({
     },
     methods: {
         deploy_master: function() {
+            this.loading = true
             axios.get(this.ajax_prefix + 'deploy_master')
+            .then(function() {
+                app.loading = false
+            })
         },
 
         update_master: function() {
+            this.loading = true
             axios.get(this.ajax_prefix + 'update_master')
+            .then(function() {
+                app.loading = false
+            })
         },
 
         get_devenvs: function() {
         },
 
         new_devenv_confirm: function(subdomain, other_info) {
+            this.loading = true
             this.devenv_form_visible = false
             var subdomain = this.new_devenv_subdomain
             this.new_devenv_subdomain = ""
@@ -52,6 +62,9 @@ var app = new Vue({
                 app.new_devenv = true
             }).catch(function(err) {
                 alert(err)
+            })
+            .then(function() {
+                app.loading = false
             })
         },
 
@@ -79,7 +92,13 @@ var app = new Vue({
                 return el.subdomain != sd
             });
 
+            app.new_devenv = false
+            app.loading = true
+
             axios.get(this.ajax_prefix + 'delete_devenv?subdomain=' + sd)
+            .then(function() {
+                app.loading = false
+            })
         }
     },
 
@@ -90,7 +109,10 @@ var app = new Vue({
         })
         .catch(function(err) {
             alert(err)
-        });
+        })
+        .then(function() {
+            app.loading = false
+        })
     }
 });
 

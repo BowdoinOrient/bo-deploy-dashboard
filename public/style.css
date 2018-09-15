@@ -109,3 +109,12 @@ pre {
     color: #EEE;
     overflow-y: scroll;
 }
+
+.loader {
+    text-align: center;
+    width: 100%;
+}
+
+svg path {
+    fill: hsla(144, 100%, 22%, 1)
+}
