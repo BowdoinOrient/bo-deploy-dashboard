@@ -78,8 +78,8 @@ var app = new Vue({
             .then(function(res) {
                 app.devenvs.push(res.data)
 
-                app.scp_code = this.generate_scp(res.data["subdomain"], res.data["creator"])
-                app.rsync_code = this.generate_rsync(res.data["subdomain"], res.data["creator"])
+                app.scp_code = app.generate_scp(res.data["subdomain"], res.data["creator"])
+                app.rsync_code = app.generate_rsync(res.data["subdomain"], res.data["creator"])
 
                 app.mysql_username = res.data["subdomain"]
                 app.mysql_password = res.data["sql_password"]
@@ -113,7 +113,7 @@ var app = new Vue({
                 return el.subdomain != sd
             });
 
-            app.new_devenv = false
+            app.info_visible = false
             app.loading = true
 
             axios.get(this.ajax_prefix + 'delete_devenv?subdomain=' + sd)

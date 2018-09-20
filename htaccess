@@ -6,6 +6,9 @@ RewriteRule ^index\.php$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.php [L]
+
+RewriteCond %{REQUEST_URI} ^/wp-content/uploads/[^\/]*/.*$
+RewriteRule ^(.*)$ https://bowdoinorient.com/$1 [QSA,L]
 </IfModule>
 # END WordPress
 
