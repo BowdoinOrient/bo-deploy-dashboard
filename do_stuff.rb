@@ -52,9 +52,9 @@ end
 def new_database_with_user(name)
     mysql_password = gen_password(24)
     client = Mysql2::Client.new(:host => 'localhost', :username => 'root', :password => ENV['DB_ROOT_PW'])
-    client.query("CREATE DATABASE " + name)
-    client.query("CREATE USER '" + name + "'@'localhost' IDENTIFIED BY '" + mysql_password + "';")
-    client.query("GRANT ALL PRIVILEGES ON " + name + " . * TO '" + name + "'@'localhost';")
+    client.query("CREATE DATABASE #{name}")
+    client.query("CREATE USER '#{name}'@'localhost' IDENTIFIED BY '#{mysql_password}';")
+    client.query("GRANT ALL PRIVILEGES ON #{name} . * TO '#{name}'@'localhost';")
     client.close
 
     return mysql_password
@@ -67,8 +67,8 @@ def delete_database_with_user(name)
     end
 
     client = Mysql2::Client.new(:host => 'localhost', :username => 'root', :password => ENV['DB_ROOT_PW'])
-    client.query("DROP DATABASE " + name + ";")
-    client.query("DROP USER IF EXISTS '" + name + "'@'localhost';")
+    client.query("DROP DATABASE #{name};")
+    client.query("DROP USER IF EXISTS '#{name}'@'localhost';")
     client.close
 end
 
@@ -143,11 +143,13 @@ end
 get '/new_devenv' do
     db = params['subdomain']
     who = params['creator']
+    notes = params['notes']
 
     db = db.gsub(/[^a-z0-9_]/, '')
     who = who.gsub(/[^a-z0-9_]/, '')
+    notes = notes.gsub(/[^a-z0-9_]/, '')
 
-    if db == "" || who == ""
+    if db == "" || who == "" || notes == ""
         return "failed"
     end
 
@@ -157,7 +159,7 @@ get '/new_devenv' do
     sync_db_export(db, db + ".test.bowdoinorient.co")
 
     client.query("USE deploy_config")
-    client.query("INSERT INTO devenvs (subdomain, creator, more_text, sql_password) VALUES ('#{db}', '#{who}', '', '#{pw}')")
+    client.query("INSERT INTO devenvs (subdomain, creator, more_text, sql_password) VALUES ('#{db}', '#{who}', '#{notes}', '#{pw}')")
 
     write_wpconfig(db, pw)
 
@@ -176,7 +178,7 @@ get '/delete_devenv' do
 
     delete_directory(db)
     client.query("USE deploy_config")
-    client.query("DELETE FROM devenvs WHERE subdomain='" + db + "';")
+    client.query("DELETE FROM devenvs WHERE subdomain='#{db}';")
     delete_database_with_user(db)
     return "done."
 end

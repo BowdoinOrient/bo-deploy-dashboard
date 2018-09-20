@@ -5,9 +5,14 @@ var app = new Vue({
         href_prefix: "http://",
         href_postfix: ".test.bowdoinorient.co",
         ajax_prefix: "http://deploy.bowdoinorient.co/",
+
         devenv_form_visible: false,
         new_devenv_subdomain: "",
+        new_devenv_user: "",
+        new_devenv_notes: "",
+
         loading: true,
+
         devenvs: [
             {
                 subdomain: 'master',
@@ -15,19 +20,32 @@ var app = new Vue({
                 more_text: "Continuously pulls from the master branch.",
             }
         ],
-        new_devenv: false,
+
+        info_visible: false,
         rsync_code: "",
         scp_code: "",
         mysql_username: "",
-        mysql_password: ""
+        mysql_password: "",
+
+        users: ["james", "steven", "nicole", "yuto", "anam"]
+
     },
+
     filters: {
         reldate: function(timestamp) {
-            console.log(timestamp)
             return moment(timestamp).fromNow()
         }
     },
+
     methods: {
+        generate_scp: function(sd, who) {
+            return "$ scp -r " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " {local location}"
+        },
+
+        generate_rsync: function(sd, who) {
+            return "rsync -ar --delete-before {local location} " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd
+        },
+
         deploy_master: function() {
             this.loading = true
             axios.get(this.ajax_prefix + 'deploy_master')
@@ -50,37 +68,40 @@ var app = new Vue({
         new_devenv_confirm: function(subdomain, other_info) {
             this.loading = true
             this.devenv_form_visible = false
+
             var subdomain = this.new_devenv_subdomain
+            var who = this.new_devenv_user
+            var notes = this.new_devenv_notes
             this.new_devenv_subdomain = ""
-            axios.get(this.ajax_prefix + 'new_devenv?subdomain=' + subdomain + '&creator=jlittle').then(function(res) {
+
+            axios.get(this.ajax_prefix + 'new_devenv?subdomain=' + subdomain + '&creator=' + who + '&notes=' + notes)
+            .then(function(res) {
                 app.devenvs.push(res.data)
 
-                app.scp_code = "scp -r deploy.bowdoinorient.co:/var/www/wordpress/" + res.data["subdomain"] + " {local location}"
-                app.rsync_code = "rsync -ar --delete-before {local location} james@159.89.231.230:/var/www/wordpress/" + res.data["subdomain"]
+                app.scp_code = this.generate_scp(res.data["subdomain"], res.data["creator"])
+                app.rsync_code = this.generate_rsync(res.data["subdomain"], res.data["creator"])
+
                 app.mysql_username = res.data["subdomain"]
                 app.mysql_password = res.data["sql_password"]
-                app.new_devenv = true
+
+                app.info_visible = true
             }).catch(function(err) {
                 alert(err)
-            })
-            .then(function() {
+            }).then(function() {
                 app.loading = false
             })
         },
 
         info_env: function(sd) {
-            console.log(sd)
             devenv = this.devenvs.filter(function(env) {
                 return env.subdomain == sd
             })[0]
 
-            console.log(devenv)
-
-            app.scp_code = "scp -r james@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " {local location}"
-            app.rsync_code = "rsync -ar --delete-before {local location} james@deploy.bowdoinorient.co:/var/www/wordpress/" + sd
+            app.scp_code = this.generate_scp(devenv.subdomain, devenv.creator)
+            app.rsync_code = this.generate_rsync(devenv.subdomain, devenv.creator)
             app.mysql_username = sd
             app.mysql_password = devenv["sql_password"]
-            app.new_devenv = true
+            app.info_visible = true
         },
 
         delete_env: function(sd) {
@@ -104,7 +125,6 @@ var app = new Vue({
 
     created: function() {
         axios.get(this.ajax_prefix + 'devenvs').then(function(res) {
-            console.log(res.data)
             app.devenvs = app.devenvs.concat(res.data)
         })
         .catch(function(err) {

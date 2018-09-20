@@ -15,15 +15,43 @@
 		    <section>
                 <button class="btn" @click="update_master">Update master</button>
                 <button class="btn" @click="deploy_master">Deploy master</button>
-                <p>Last deployed {{ last_deploy_timestamp | reldate}}</p>
+                <!--<p>Last deployed {{ last_deploy_timestamp | reldate}}</p>-->
 		    </section>
 
 		    <section>
-                <button class="btn" @click="devenv_form_visible = !devenv_form_visible">New Dev Environment</button>
-                <p v-if="devenv_form_visible">
-                    <input v-model="new_devenv_subdomain" placeholder="subdomain"><code>.test.bowdoinorient.co</code><br>
-                    <button @click="new_devenv_confirm" v-bind:disabled="new_devenv_subdomain.match(/[^a-z0-9_]/)">Confirm</button>
-                </p>
+                <button class="btn"
+                    @click="devenv_form_visible = !devenv_form_visible">
+                    New Dev Environment
+                </button>
+
+                <div class="devenv_form" v-if="devenv_form_visible">
+                    <p>
+                        <input v-model="new_devenv_subdomain" placeholder="subdomain"
+                         autocomplete='off' spellcheck='false' autocorrect='off'
+                        ><code>.test.bowdoinorient.co</code>
+                    </p>
+
+                    <p>
+                        Who are you?
+                        <select v-model="new_devenv_user">
+                            <option v-for="user in users" v-bind:value="user">
+                                {{ user }}
+                            </option>
+                        </select>
+                    </p>
+
+                    <p>
+                        Other notes?
+                        <textarea v-model="new_devenv_notes"></textarea>
+                    </p>
+
+                    <p>
+                        <button @click="new_devenv_confirm"
+                            v-bind:disabled="new_devenv_subdomain.match(/[^a-z0-9_]/)">
+                            Confirm
+                        </button>
+                    </p>
+                </div>
 
                 <p v-if="new_devenv_subdomain.match(/[^a-z0-9_]/)" class="warning-text">You can only have lower case letters, numbers, and underscores in the subdomain.</p>
 
@@ -33,7 +61,7 @@
                     <a v-bind:href="href_prefix + env.subdomain + href_postfix"
                        >{{env.subdomain}}</a>
                     — {{ env.more_text }}
-                    Last updated {{env.last_updated | reldate}}.
+                    <!--Last updated {{env.last_updated | reldate}}.-->
                     <span v-if="env.subdomain != 'master'">
                         <a href="#" @click="info_env(env.subdomain)">info</a> |
                         <a href="#" class="delete" @click="delete_env(env.subdomain)">delete</a>
@@ -42,8 +70,8 @@
                 </ul>
             </section>
 
-            <section v-if="new_devenv">
-                <p><strong>scp code:</strong></p>
+            <section v-if="info_visible">
+                <p><strong>scp code:</strong> (this'll probably take a long time)</p>
                 <pre><code>$ {{ scp_code }}</code></pre>
                 <p><strong>rsync code:</strong></p>
                 <pre><code>$ {{ rsync_code }}</code></pre>
@@ -53,9 +81,7 @@
 
             <div v-if="loading">
                 <div class="loader loader--style2" title="1">
-                  <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                     width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
-                  <path fill="#000" d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">
+                  <svg version="1.1" id="loader-1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve"><path fill="#000" d="M25.251,6.461c-10.318,0-18.683,8.365-18.683,18.683h4.068c0-8.071,6.543-14.615,14.615-14.615V6.461z">
                     <animateTransform attributeType="xml"
                       attributeName="transform"
                       type="rotate"
