@@ -43,12 +43,13 @@
                     </p>
 
                     <p>
-                        Other notes?
+                        Other notes?<br>
                         <textarea v-model="new_devenv_notes"></textarea>
                     </p>
 
                     <p>
                         <button @click="new_devenv_confirm"
+                            class="btn btn--small"
                             v-bind:disabled="new_devenv_subdomain.match(/[^a-z0-9_]/)">
                             Confirm
                         </button>
