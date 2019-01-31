@@ -65,8 +65,12 @@
                     — {{ env.more_text }}
                     <!--Last updated {{env.last_updated | reldate}}.-->
                     <span v-if="env.subdomain != 'master'">
-                        <a href="#" @click="info_env(env.subdomain)">info</a> |
-                        <a href="#" class="delete" @click="delete_env(env.subdomain)">delete</a>
+                        <a @click="info_env(env.subdomain)">info</a> |
+                        <a class="delete" v-if="deleting == null" @click="deleting = env.subdomain">delete</a>
+                        <span v-if="deleting == env.subdomain">are you sure?
+                            <a @click="deleting = null">no</a> |
+                            <a @click="delete_env(env.subdomain)" class="delete">yes</a>
+                        </span>
                     </span>
                     </li>
                 </ul>

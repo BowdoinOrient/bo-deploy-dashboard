@@ -11,6 +11,8 @@ var app = new Vue({
         new_devenv_user: "",
         new_devenv_notes: "",
 
+        deleting: null,
+
         loading: true,
 
         devenvs: [
@@ -105,6 +107,7 @@ var app = new Vue({
         },
 
         delete_env: function(sd) {
+            this.deleting = null;
             if(sd == "master") {
                 return
             }
