@@ -114,10 +114,16 @@ p {
 }
 
 pre {
-    padding: 8px;
+    padding: 12px;
     background: #444;
     color: #EEE;
     overflow-y: scroll;
+    border-radius: 5px;
+}
+
+pre code:before {
+    content: "$ ";
+    display: inline;
 }
 
 .loader {

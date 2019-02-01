@@ -79,9 +79,9 @@
 
             <section v-if="info_visible">
                 <p><strong>scp code:</strong> (this'll probably take a long time)</p>
-                <pre><code>$ {{ scp_code }}</code></pre>
+                <pre><code>{{ scp_code }}</code></pre>
                 <p><strong>rsync code:</strong></p>
-                <pre><code>$ {{ rsync_code }}</code></pre>
+                <pre><code>{{ rsync_code }}</code></pre>
                 <p><strong>MySQL info:</strong></p>
                 <p>Username: <code>{{ mysql_username }}</code><br>Password: <code>{{ mysql_password }}</code></p>
             </section>

@@ -29,7 +29,7 @@ var app = new Vue({
         mysql_username: "",
         mysql_password: "",
 
-        users: ["james", "steven", "nicole", "yuto", "anam"]
+        users: ["james", "steven", "nicole", "yuto", "anam", "conrad"]
 
     },
 
@@ -41,11 +41,11 @@ var app = new Vue({
 
     methods: {
         generate_scp: function(sd, who) {
-            return "$ scp -r " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " {local location}"
+            return "scp -r " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " ."
         },
 
         generate_rsync: function(sd, who) {
-            return "rsync -ar --delete-before {local location} " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd
+            return "rsync -arO --delete-before . " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd
         },
 
         deploy_master: function() {
@@ -75,6 +75,11 @@ var app = new Vue({
             var who = this.new_devenv_user
             var notes = this.new_devenv_notes
             this.new_devenv_subdomain = ""
+
+            if(subdomain == "" || who == "") {
+                alert("Enter a subdomain and/or a person");
+                return;
+            }
 
             axios.get(this.ajax_prefix + 'new_devenv?subdomain=' + subdomain + '&creator=' + who + '&notes=' + notes)
             .then(function(res) {

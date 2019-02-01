@@ -17,8 +17,8 @@ def download_into_directory(dir)
     end
 
     g = Git.clone("git@github.com:BowdoinOrient/bowpress.git", dir, :path => "/var/www/wordpress")
-    FileUtils.chown("james", "developers", "/var/www/wordpress/#{dir}")
-    FileUtils.chmod(0775, "/var/www/wordpress/#{dir}")
+    FileUtils.chown_R("james", "developers", "/var/www/wordpress/#{dir}")
+    FileUtils.chmod_R(0775, "/var/www/wordpress/#{dir}")
 end
 
 def delete_directory(dir)
@@ -149,7 +149,7 @@ get '/new_devenv' do
 
     db = db.gsub(/[^a-z0-9_]/, '')
     who = who.gsub(/[^a-z0-9_]/, '')
-    notes = notes.gsub(/[^a-z0-9_]/, '')
+    notes = notes.gsub(/[\"\'\;]/, '')
 
     if db == "" || who == ""
         return "failed"
