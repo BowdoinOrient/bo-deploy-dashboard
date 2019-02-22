@@ -106,7 +106,7 @@ def write_wpconfig(db, pw)
     uri = open("https://api.wordpress.org/secret-key/1.1/salt/")
     keys = uri.read
 
-    File.open("./wp-config.php") do |source_file|
+    File.open("./wp-config.txt") do |source_file|
         contents = source_file.read
         contents.gsub!("replace_dbname", db)
         contents.gsub!("replace_dbuser", db)
@@ -115,7 +115,7 @@ def write_wpconfig(db, pw)
         File.open("/var/www/wordpress/#{db}/wp-config.php", "w+") { |f| f.write(contents) }
     end
 
-    FileUtils.cp("./htaccess", "/var/www/wordpress/#{db}/.htaccess")
+    FileUtils.cp("./htaccess.txt", "/var/www/wordpress/#{db}/.htaccess")
 end
 
 get '/' do
