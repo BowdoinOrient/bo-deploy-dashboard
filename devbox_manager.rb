@@ -17,6 +17,7 @@ def download_into_directory(dir)
     end
 
     g = Git.clone("git@github.com:BowdoinOrient/bowpress.git", dir, :path => "/var/www/wordpress")
+    g.checkout(g.branch(dir))
     FileUtils.chown_R("james", "developers", "/var/www/wordpress/#{dir}")
     FileUtils.chmod_R(0775, "/var/www/wordpress/#{dir}")
 end
