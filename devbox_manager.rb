@@ -148,8 +148,8 @@ get '/new_devenv' do
     who = params['creator']
     notes = params['notes']
 
-    db = db.gsub(/[^a-z0-9_]/, '')
-    who = who.gsub(/[^a-z0-9_]/, '')
+    db = db.gsub(/[^a-z0-9-]/, '')
+    who = who.gsub(/[^a-z0-9]/, '')
     notes = notes.gsub(/[\"\'\;]/, '')
 
     if db == "" || who == ""

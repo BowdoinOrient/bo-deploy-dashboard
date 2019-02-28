@@ -56,7 +56,7 @@
                     </p>
                 </div>
 
-                <p v-if="new_devenv_subdomain.match(/[^a-z0-9_]/)" class="warning-text">You can only have lower case letters, numbers, and underscores in the subdomain.</p>
+                <p v-if="new_devenv_subdomain.match(/[^a-z0-9-]/)" class="warning-text">You can only have lower case letters, numbers, and hyphens in the subdomain.</p>
 
                <ul class="envs">
                     <li v-for="env in devenvs">
