@@ -4,7 +4,7 @@ var app = new Vue({
         last_deploy_timestamp: "2018-08-01 00:00:01",
         href_prefix: "http://",
         href_postfix: ".test.bowdoinorient.co",
-        ajax_prefix: "http://deploy.bowdoinorient.co/",
+        ajax_prefix: window.location.origin,
 
         devenv_form_visible: false,
         new_devenv_subdomain: "",

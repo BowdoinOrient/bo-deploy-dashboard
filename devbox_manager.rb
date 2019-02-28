@@ -2,6 +2,7 @@ require 'git'
 require 'rsync'
 require 'sinatra'
 require 'mysql2'
+require 'sudo'
 require 'fileutils'
 require 'json'
 require 'dotenv'
@@ -17,9 +18,12 @@ def download_into_directory(dir)
     end
 
     g = Git.clone("git@github.com:BowdoinOrient/bowpress.git", dir, :path => "/var/www/wordpress")
-    g.checkout(g.branch(dir))
-    FileUtils.chown_R("james", "developers", "/var/www/wordpress/#{dir}")
-    FileUtils.chmod_R(0775, "/var/www/wordpress/#{dir}")
+    g.config('core.fileMode', 'false')
+    g.branch(dir).checkout
+    Sudo::Wrapper.run do |sudo|
+        sudo[FileUtils].chown_R("james", "developers", "/var/www/wordpress/#{dir}")
+	sudo[FileUtils].chmod_R(0775, "/var/www/wordpress/#{dir}")
+    end
 end
 
 def delete_directory(dir)
@@ -76,7 +80,7 @@ def delete_database_with_user(name)
 end
 
 def get_newest_db_export
-    Dir["/home/orientweb-sync/db-sync/*.sql"].sort!.reverse![0]
+    Dir["/home/ubuntu/db-sync/*.sql"].sort!.reverse![0]
 end
 
 def clean_db_file(orig_db_backup_fname, replacement_domain)
@@ -113,10 +117,17 @@ def write_wpconfig(db, pw)
         contents.gsub!("replace_dbuser", db)
         contents.gsub!("replace_dbpw", pw)
         contents.gsub!("replace_keys", keys)
-        File.open("/var/www/wordpress/#{db}/wp-config.php", "w+") { |f| f.write(contents) }
+	
+	File.open("./wp-config.php", "w+") { |f| f.write(contents) }
     end
 
-    FileUtils.cp("./htaccess.txt", "/var/www/wordpress/#{db}/.htaccess")
+    Sudo::Wrapper.run do |sudo|
+	sudo[FileUtils].mv("./wp-config.php", "/var/www/wordpress/#{db}/wp-config.php")
+        sudo[FileUtils].cp("./htaccess.txt", "/var/www/wordpress/#{db}/.htaccess")
+
+        sudo[FileUtils].chown_R("james", "developers", "/var/www/wordpress/#{db}")
+	sudo[FileUtils].chmod_R(0775, "/var/www/wordpress/#{db}")
+    end
 end
 
 get '/' do
@@ -139,7 +150,6 @@ get '/devenvs' do
     envs = client.query('SELECT * FROM devenvs').each(:as => :json) do |row|
         output.push(JSON.generate(row))
     end
-
     return "[" + output.join(", ") + "]"
 end
 
