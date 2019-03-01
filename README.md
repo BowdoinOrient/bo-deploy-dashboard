@@ -2,7 +2,9 @@
 
 A web-based deployment application for the Bowdoin Orient.
 
-To be deployed on a server running Apache and [Passenger](https://www.phusionpassenger.com). This directory should be in `/var/www/deploy`; there should also exist a `/var/www/wordpress` directory where the different environments will go.
+To be deployed on a server running Apache and [Passenger](https://www.phusionpassenger.com). Make sure to follow the [Passenger deployment instructions](https://www.phusionpassenger.com/docs/tutorials/deploy_to_production/deploying_your_app/oss/ownserver/ruby/apache/) very carefully. This application does have a Gemfile; at the appropriate time, run `bundle install` to pull down all the dependencies.
+
+This directory should be in `/var/www/deploy`; there should also exist a `/var/www/wordpress` directory where the different environments will go.
 
 A MySQL server is needed, with the following table in the `deploy_config` database:
 
