@@ -68,13 +68,13 @@ def new_database_with_user(name)
 end
 
 def delete_database_with_user(name)
-    name = name.gsub(/[^a-z0-9_]/, '')
+    name = name.gsub(/[^a-z0-9]/, '')
     if name == ""
         return
     end
 
     client = Mysql2::Client.new(:host => 'localhost', :username => 'root', :password => ENV['DB_ROOT_PW'])
-    client.query("DROP DATABASE #{name};")
+    client.query("DROP DATABASE IF EXISTS #{name};")
     client.query("DROP USER IF EXISTS '#{name}'@'localhost';")
     client.close
 end
@@ -158,7 +158,7 @@ get '/new_devenv' do
     who = params['creator']
     notes = params['notes']
 
-    db = db.gsub(/[^a-z0-9-]/, '')
+    db = db.gsub(/[^a-z0-9]/, '')
     who = who.gsub(/[^a-z0-9]/, '')
     notes = notes.gsub(/[\"\'\;]/, '')
 
@@ -183,7 +183,7 @@ end
 
 get '/delete_devenv' do
     db = params['subdomain']
-    db = db.gsub(/[^a-z0-9_]/, '')
+    db = db.gsub(/[^a-z0-9]/, '')
 
     if db == ""
         return "failed"

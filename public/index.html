@@ -50,13 +50,13 @@
                     <p>
                         <button @click="new_devenv_confirm"
                             class="btn btn--small"
-                            v-bind:disabled="new_devenv_subdomain.match(/[^a-z0-9_]/)">
+                            v-bind:disabled="new_devenv_subdomain.match(/[^a-z0-9]/)">
                             Confirm
                         </button>
                     </p>
                 </div>
 
-                <p v-if="new_devenv_subdomain.match(/[^a-z0-9-]/)" class="warning-text">You can only have lower case letters, numbers, and hyphens in the subdomain.</p>
+                <p v-if="new_devenv_subdomain.match(/[^a-z0-9]/)" class="warning-text">You can only have lower case letters and numbers in the subdomain.</p>
 
                <ul class="envs">
                     <li v-for="env in devenvs">
