@@ -41,6 +41,7 @@ var app = new Vue({
 
     methods: {
         generate_scp: function(sd, who) {
+	    return "rsync -ar0 --delete-before " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " ."
             return "scp -r " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " ."
         },
 
