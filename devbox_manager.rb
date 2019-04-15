@@ -20,10 +20,6 @@ def download_into_directory(dir)
     g = Git.clone("git@github.com:BowdoinOrient/bowpress.git", dir, :path => "/var/www/wordpress")
     g.config('core.fileMode', 'false')
     g.branch(dir).checkout
-    Sudo::Wrapper.run do |sudo|
-        sudo[FileUtils].chown_R("james", "developers", "/var/www/wordpress/#{dir}")
-	sudo[FileUtils].chmod_R(0775, "/var/www/wordpress/#{dir}")
-    end
 end
 
 def delete_directory(dir)
@@ -120,13 +116,12 @@ def write_wpconfig(db, pw)
 	
 	File.open("./wp-config.php", "w+") { |f| f.write(contents) }
     end
+end
 
+def fix_directory_permissions(db)
     Sudo::Wrapper.run do |sudo|
-	sudo[FileUtils].mv("./wp-config.php", "/var/www/wordpress/#{db}/wp-config.php")
-        sudo[FileUtils].cp("./htaccess.txt", "/var/www/wordpress/#{db}/.htaccess")
-
-        sudo[FileUtils].chown_R("james", "developers", "/var/www/wordpress/#{db}")
-	sudo[FileUtils].chmod_R(0775, "/var/www/wordpress/#{db}")
+        sudo[FileUtils].chown_R("www-data", "devgrp", "/var/www/wordpress/#{db}")
+        sudo[FileUtils].chmod_R(0775, "/var/www/wordpress/#{db}")
     end
 end
 
@@ -175,6 +170,7 @@ get '/new_devenv' do
     client.query("INSERT INTO devenvs (subdomain, creator, more_text, sql_password) VALUES ('#{db}', '#{who}', '#{notes}', '#{pw}')")
 
     write_wpconfig(db, pw)
+        fix_directory_permissions(db)
 
     return JSON.generate(
         client.query("SELECT * FROM devenvs WHERE subdomain='#{db}'", :as => :json).first
