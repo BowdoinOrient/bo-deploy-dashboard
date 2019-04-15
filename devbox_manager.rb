@@ -14,7 +14,7 @@ client = Mysql2::Client.new(:host => 'localhost', :username => 'root', :password
 
 def download_into_directory(dir)
     if Dir.exist?("/var/www/wordpress/#{dir}")
-        raise "Directory already exists"
+        FileUtils.rm_rf("/var/www/wordpress/#{dir}")
     end
 
     g = Git.clone("git@github.com:BowdoinOrient/bowpress.git", dir, :path => "/var/www/wordpress")
@@ -23,16 +23,14 @@ def download_into_directory(dir)
 end
 
 def delete_directory(dir)
-    if !Dir.exist?("/var/www/wordpress/#{dir}")
-        raise "Directory does not exist"
+    if Dir.exist?("/var/www/wordpress/#{dir}")
+        FileUtils.rm_rf("/var/www/wordpress/#{dir}")
     end
-
-    FileUtils.rm_rf("/var/www/wordpress/#{dir}")
 end
 
 def update_master
     if !Dir.exist?('/var/www/wordpress/master')
-        raise "Master directory doesn't exist"
+        return
     end
 
     # not the same as `git init`, instead initializing a Git obj
@@ -55,6 +53,8 @@ end
 def new_database_with_user(name)
     mysql_password = gen_password(24)
     client = Mysql2::Client.new(:host => 'localhost', :username => 'root', :password => ENV['DB_ROOT_PW'])
+    client.query("DROP DATABASE IF EXISTS #{name};")
+    client.query("DROP USER IF EXISTS '#{name}'@'localhost';")
     client.query("CREATE DATABASE #{name}")
     client.query("CREATE USER '#{name}'@'localhost' IDENTIFIED BY '#{mysql_password}';")
     client.query("GRANT ALL PRIVILEGES ON #{name} . * TO '#{name}'@'localhost';")
@@ -66,7 +66,7 @@ end
 def delete_database_with_user(name)
     name = name.gsub(/[^a-z0-9]/, '')
     if name == ""
-        raise "Invalid database name"
+        return "Invalid database name"
     end
 
     client = Mysql2::Client.new(:host => 'localhost', :username => 'root', :password => ENV['DB_ROOT_PW'])
