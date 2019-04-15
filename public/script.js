@@ -24,8 +24,8 @@ var app = new Vue({
         ],
 
         info_visible: false,
-        rsync_code: "",
-        scp_code: "",
+        upload_code: "",
+        download_code: "",
         mysql_username: "",
         mysql_password: "",
 
@@ -40,12 +40,11 @@ var app = new Vue({
     },
 
     methods: {
-        generate_scp: function(sd, who) {
-	    return "rsync -ar0 --delete-before " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " ."
-            return "scp -r " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " ."
+        generate_download: function(sd, who) {
+            return "rsync -ar0 --delete-before dev@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " ."
         },
 
-        generate_rsync: function(sd, who) {
+        generate_upload: function(sd, who) {
             return "rsync -arO --delete-before . " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd
         },
 
@@ -86,8 +85,8 @@ var app = new Vue({
             .then(function(res) {
                 app.devenvs.push(res.data)
 
-                app.scp_code = app.generate_scp(res.data["subdomain"], res.data["creator"])
-                app.rsync_code = app.generate_rsync(res.data["subdomain"], res.data["creator"])
+                app.download_code = app.generate_download(res.data["subdomain"], res.data["creator"])
+                app.upload_code = app.generate_upload(res.data["subdomain"], res.data["creator"])
 
                 app.mysql_username = res.data["subdomain"]
                 app.mysql_password = res.data["sql_password"]
@@ -105,8 +104,8 @@ var app = new Vue({
                 return env.subdomain == sd
             })[0]
 
-            app.scp_code = this.generate_scp(devenv.subdomain, devenv.creator)
-            app.rsync_code = this.generate_rsync(devenv.subdomain, devenv.creator)
+            app.download_code = this.generate_download(devenv.subdomain, devenv.creator)
+            app.upload_code = this.generate_upload(devenv.subdomain, devenv.creator)
             app.mysql_username = sd
             app.mysql_password = devenv["sql_password"]
             app.info_visible = true
