@@ -8,7 +8,6 @@ var app = new Vue({
 
         devenv_form_visible: false,
         new_devenv_subdomain: "",
-        new_devenv_user: "",
         new_devenv_notes: "",
 
         deleting: null,
@@ -37,12 +36,12 @@ var app = new Vue({
     },
 
     methods: {
-        generate_download: function(sd, who) {
+        generate_download: function(sd) {
             return "rsync -ar0 --delete-before dev@deploy.bowdoinorient.co:/var/www/wordpress/" + sd + " ."
         },
 
-        generate_upload: function(sd, who) {
-            return "rsync -arO --delete-before . " + who + "@deploy.bowdoinorient.co:/var/www/wordpress/" + sd
+        generate_upload: function(sd) {
+            return "rsync -arO --delete-before . dev@deploy.bowdoinorient.co:/var/www/wordpress/" + sd
         },
 
         deploy_master: function() {
@@ -69,16 +68,15 @@ var app = new Vue({
             this.devenv_form_visible = false
 
             var subdomain = this.new_devenv_subdomain
-            var who = this.new_devenv_user
             var notes = this.new_devenv_notes
             this.new_devenv_subdomain = ""
 
-            if(subdomain == "" || who == "") {
+            if(subdomain == "") {
                 alert("Enter a subdomain and/or a person");
                 return;
             }
 
-            axios.get(this.ajax_prefix + 'new_devenv?subdomain=' + subdomain + '&creator=' + who + '&notes=' + notes)
+            axios.get(this.ajax_prefix + 'new_devenv?subdomain=' + subdomain + '&notes=' + notes)
             .then(function(res) {
                 app.devenvs.push(res.data)
 
