@@ -28,9 +28,6 @@ var app = new Vue({
         download_code: "",
         mysql_username: "",
         mysql_password: "",
-
-        users: ["james", "steven", "nicole", "yuto", "anam", "conrad"]
-
     },
 
     filters: {

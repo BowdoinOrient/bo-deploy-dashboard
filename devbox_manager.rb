@@ -24,7 +24,7 @@ end
 
 def delete_directory(dir)
     if !Dir.exist?("/var/www/wordpress/#{dir}")
-        return
+        raise "Directory does not exist"
     end
 
     FileUtils.rm_rf("/var/www/wordpress/#{dir}")
@@ -32,7 +32,7 @@ end
 
 def update_master
     if !Dir.exist?('/var/www/wordpress/master')
-        raise "Master directory doesn't exist :("
+        raise "Master directory doesn't exist"
     end
 
     # not the same as `git init`, instead initializing a Git obj
@@ -66,7 +66,7 @@ end
 def delete_database_with_user(name)
     name = name.gsub(/[^a-z0-9]/, '')
     if name == ""
-        return
+        raise "Invalid database name"
     end
 
     client = Mysql2::Client.new(:host => 'localhost', :username => 'root', :password => ENV['DB_ROOT_PW'])
@@ -130,22 +130,34 @@ get '/' do
 end
 
 get '/update_master' do
-    update_master
-    return "done."
+    begin
+        update_master
+    rescue StandardError => e
+        return [500, e.message]
+    end
+    return [200, "Master updated"]
 end
 
 get '/deploy_master' do
-    deploy_master
-    return "done."
+    begin
+        deploy_master
+    rescue StandardError => e
+        return [500, e.message]
+    end
+    return [200, "Master deployed"]
 end
 
 get '/devenvs' do
-    client.query('use deploy_config')
-    output = []
-    envs = client.query('SELECT * FROM devenvs').each(:as => :json) do |row|
-        output.push(JSON.generate(row))
+    begin
+        client.query('use deploy_config')
+        output = []
+        envs = client.query('SELECT * FROM devenvs').each(:as => :json) do |row|
+            output.push(JSON.generate(row))
+        end
+        return "[" + output.join(", ") + "]"
+    rescue StandardError => e
+        return [500, e.message]
     end
-    return "[" + output.join(", ") + "]"
 end
 
 get '/new_devenv' do
@@ -158,23 +170,26 @@ get '/new_devenv' do
     notes = notes.gsub(/[\"\'\;]/, '')
 
     if db == "" || who == ""
-        return "failed"
+        return [500, "Invalid database name."]
     end
 
-    download_into_directory(db)
+    begin
+        download_into_directory(db)
+        pw = new_database_with_user(db)
+        sync_db_export(db, db + ".test.bowdoinorient.co")
 
-    pw = new_database_with_user(db)
-    sync_db_export(db, db + ".test.bowdoinorient.co")
+        client.query("USE deploy_config")
+        client.query("INSERT INTO devenvs (subdomain, creator, more_text, sql_password) VALUES ('#{db}', 'nobody', '#{notes}', '#{pw}')")
 
-    client.query("USE deploy_config")
-    client.query("INSERT INTO devenvs (subdomain, creator, more_text, sql_password) VALUES ('#{db}', '#{who}', '#{notes}', '#{pw}')")
-
-    write_wpconfig(db, pw)
+        write_wpconfig(db, pw)
         fix_directory_permissions(db)
 
-    return JSON.generate(
-        client.query("SELECT * FROM devenvs WHERE subdomain='#{db}'", :as => :json).first
-    )
+        return JSON.generate(
+            client.query("SELECT * FROM devenvs WHERE subdomain='#{db}'", :as => :json).first
+        )
+    rescue StandardError => e
+        return [500, e.message]
+    end
 end
 
 get '/delete_devenv' do
@@ -182,12 +197,16 @@ get '/delete_devenv' do
     db = db.gsub(/[^a-z0-9]/, '')
 
     if db == ""
-        return "failed"
+        return [500, "Invalid database name."]
     end
 
-    delete_directory(db)
-    client.query("USE deploy_config")
-    client.query("DELETE FROM devenvs WHERE subdomain='#{db}';")
-    delete_database_with_user(db)
-    return "done."
+    begin
+        delete_directory(db)
+        client.query("USE deploy_config")
+        client.query("DELETE FROM devenvs WHERE subdomain='#{db}';")
+        delete_database_with_user(db)
+        return "Deleted #{db}"
+    rescue StandardError => e
+        return [500, e.message]
+    end
 end
