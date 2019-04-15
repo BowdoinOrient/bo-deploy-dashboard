@@ -131,7 +131,7 @@ var app = new Vue({
             app.devenvs = app.devenvs.concat(res.data)
         })
         .catch(function(err) {
-            alert(err)
+            alert("Server error: " + error.response)
         })
         .then(function() {
             app.loading = false

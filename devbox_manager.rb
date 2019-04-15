@@ -114,7 +114,7 @@ def write_wpconfig(db, pw)
         contents.gsub!("replace_dbpw", pw)
         contents.gsub!("replace_keys", keys)
 	
-	File.open("./wp-config.php", "w+") { |f| f.write(contents) }
+	File.open("/var/www/wordpress/#{db}/wp-config.php", "w+") { |f| f.write(contents) }
     end
 end
 
