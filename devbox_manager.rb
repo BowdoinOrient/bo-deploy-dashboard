@@ -125,6 +125,9 @@ def fix_directory_permissions(db)
     end
 end
 
+############ ^ Helper functions ############
+################ Endpoints v ###############
+
 get '/' do
     send_file File.join(settings.public_folder, 'index.html')
 end
