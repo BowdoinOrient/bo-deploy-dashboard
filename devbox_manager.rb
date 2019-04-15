@@ -162,14 +162,12 @@ end
 
 get '/new_devenv' do
     db = params['subdomain']
-    who = params['creator']
     notes = params['notes']
 
     db = db.gsub(/[^a-z0-9]/, '')
-    who = who.gsub(/[^a-z0-9]/, '')
     notes = notes.gsub(/[\"\'\;]/, '')
 
-    if db == "" || who == ""
+    if db == ""
         return [500, "Invalid database name."]
     end
 
